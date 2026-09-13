@@ -3,11 +3,21 @@
   "displayName": "Extension Diet",
   "description": "Bikin VSCode lebih ringan per project by keeping irrelevant stack extensions from running in optimized windows.",
   "version": "0.1.0",
+  "publisher": "harikahono",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/harikahono/extension-diet.git"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": ["Other"],
-  "activationEvents": ["onStartupFinished"],
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
@@ -36,11 +46,13 @@
   "scripts": {
     "compile": "tsc -p ./",
     "check": "tsc -p ./ && node ./out/check.js",
+    "package": "vsce package",
     "vscode:prepublish": "npm run compile"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
     "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.9.2",
     "typescript": "^5.5.0"
   }
 }

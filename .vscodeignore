@@ -1,0 +1,9 @@
+.vscode/**
+src/**
+node_modules/**
+.gitignore
+tsconfig.json
+*.vsix
+src/check.ts
+out/check.js
+out/check.js.map
