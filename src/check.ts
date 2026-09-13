@@ -85,3 +85,12 @@ assert.deepStrictEqual(plan.keptPinned.map(e => e.id), ['esbenp.prettier-vscode'
 assert.deepStrictEqual(plan.keptAlways.map(e => e.id), []);
 assert.deepStrictEqual(plan.unknownKept.map(e => e.id), ['some.unknown-ext']);
 console.log('plan check: OK');
+
+const sangar = getOptimizationPlan(
+  ['onecentlin.laravel-blade', 'junstyle.php-cs-fixer', 'charliermarsh.ruff', 'ms-python.black-formatter',
+   'vadimcn.vscode-lldb', 'serayuzgur.crates', 'felixangelov.bloc', 'christian-kohler.npm-intellisense',
+   'wix.vscode-import-cost', 'svelte.svelte-vscode', 'astro-build.astro-vscode', 'ms-toolsai.jupyter'],
+  ['php']);
+assert.strictEqual(sangar.notRunning.length, 10);
+assert.deepStrictEqual(sangar.keptByStack.map(e => e.id), ['onecentlin.laravel-blade', 'junstyle.php-cs-fixer']);
+console.log('mapping-research check: OK');
