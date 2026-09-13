@@ -26,6 +26,8 @@ const mono = tmp(); touch(mono, 'backend/package.json'); touch(mono, 'frontend/p
 assert.deepStrictEqual(detectStack(mono), ['node']);
 const skipped = tmp(); touch(skipped, 'node_modules/package.json'); touch(skipped, 'dist/package.json');
 assert.deepStrictEqual(detectStack(skipped), []);
+const rn = tmp(); touch(rn, 'app.json'); touch(rn, 'metro.config.js');
+assert.deepStrictEqual(detectStack(rn), ['node']);
 assert.deepStrictEqual(detectStack(tmp()), []);
 console.log('detect check: OK');
 
@@ -66,6 +68,11 @@ console.log('relaunch check: OK');
 assert.deepStrictEqual(
   getDisableCandidates(['rust-lang.rust-analyzer', 'golang.go'], ['php'], ['Rust-Lang.Rust-Analyzer']),
   ['golang.go']);
+assert.deepStrictEqual(
+  getDisableCandidates(['msjsdiag.vscode-react-native', 'rust-lang.rust-analyzer'], ['php']),
+  ['msjsdiag.vscode-react-native', 'rust-lang.rust-analyzer']);
+assert.deepStrictEqual(
+  getDisableCandidates(['msjsdiag.vscode-react-native'], ['node']), []);
 console.log('pin check: OK');
 
 const plan = getOptimizationPlan(

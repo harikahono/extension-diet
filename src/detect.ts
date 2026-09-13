@@ -9,6 +9,9 @@ const ROOT_MARKERS: Record<string, string> = {
   'pubspec.yaml': 'flutter',
   'requirements.txt': 'python',
   'go.mod': 'go',
+  'app.json': 'node',
+  'metro.config.js': 'node',
+  'react-native.config.js': 'node',
 };
 
 export const MARKERS: Record<string, string> = {

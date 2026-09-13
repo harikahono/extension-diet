@@ -38,6 +38,8 @@ const STACK_OF: Record<string, ExtMeta> = {
   'ms-vscode.vscode-typescript-next': { stack: 'node', label: 'TypeScript Next', reason: 'JS/TS tooling' },
   'vue.volar': { stack: 'node', label: 'Vue Official', reason: 'Vue tooling' },
   'dsznajder.es7-react-js-snippets': { stack: 'node', label: 'ES7 React Snippets', reason: 'React snippets' },
+  'msjsdiag.vscode-react-native': { stack: 'node', label: 'React Native Tools', reason: 'React Native tooling' },
+  'msjsdiag.vscode-react-native-preview': { stack: 'node', label: 'React Native Tools Preview', reason: 'React Native tooling' },
   'rust-lang.rust-analyzer': { stack: 'rust', label: 'rust-analyzer', reason: 'Rust language server' },
   'tauri-apps.tauri-vscode': { stack: 'rust', label: 'Tauri', reason: 'Tauri/Rust app tooling' },
   'dart-code.dart-code': { stack: 'flutter', label: 'Dart', reason: 'Dart language tooling' },
