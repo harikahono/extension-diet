@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { detectStack } from './detect';
-import { getDisableCandidates, getOptimizationPlan } from './mapping';
+import { formatExamples, getDisableCandidates, getOptimizationPlan } from './mapping';
 import { stateKey } from './store';
 import { buildCommandString, buildRelaunchArgs, isReuseMode } from './relaunch';
 
@@ -94,3 +94,9 @@ const sangar = getOptimizationPlan(
 assert.strictEqual(sangar.notRunning.length, 10);
 assert.deepStrictEqual(sangar.keptByStack.map(e => e.id), ['onecentlin.laravel-blade', 'junstyle.php-cs-fixer']);
 console.log('mapping-research check: OK');
+
+assert.strictEqual(formatExamples([]), '');
+assert.strictEqual(formatExamples(['Python']), 'Python');
+assert.strictEqual(formatExamples(['Python', 'Flutter', 'Rust']), 'Python, Flutter, Rust');
+assert.strictEqual(formatExamples(['Python', 'Flutter', 'Rust', 'Go']), 'Python, Flutter, Rust +1 more');
+console.log('format check: OK');

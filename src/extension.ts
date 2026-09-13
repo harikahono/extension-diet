@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { detectStack } from './detect';
-import { getDisableCandidates, getOptimizationPlan, PlanEntry } from './mapping';
+import { formatExamples, getDisableCandidates, getOptimizationPlan, PlanEntry } from './mapping';
 import { buildCommandString, cliAvailable, isReuseMode, launchOptimized } from './relaunch';
 import { clearDecision, getDecision, saveDecision, stateKey } from './store';
 
@@ -50,16 +50,53 @@ async function maybeNotify(context: vscode.ExtensionContext, log: vscode.OutputC
     vscode.window.showInformationMessage('Extension Diet: no stack detected, everything stays on.');
     return;
   }
-  const candidates = getDisableCandidates(vscode.extensions.all.map(e => e.id), stacks, getPins(context.globalState));
-  const pick = await vscode.window.showInformationMessage(
-    `Extension Diet: detected ${stacks.join(', ')}, relaunch with ${candidates.length} extensions not running in this window?`,
-    'Optimize', 'Skip', 'Never for this repo');
-  if (pick === 'Optimize') await runOptimize(context, log, folder, stacks, candidates, key);
+  const candidates = getOptimizationPlan(vscode.extensions.all.map(e => e.id), stacks, getPins(context.globalState)).notRunning;
+  const examples = formatExamples(candidates.map(e => e.label));
+  let pick = await vscode.window.showInformationMessage(
+    `Extension Diet: detected ${stacks.join(' + ')}, ${candidates.length} won't run${examples ? ` (e.g. ${examples})` : ''}?`,
+    'Optimize', 'Details', 'Skip', 'Never for this repo');
+  while (pick === 'Details') {
+    showOptimizationResult(context, log);
+    pick = await vscode.window.showInformationMessage(
+      `Extension Diet: detected ${stacks.join(' + ')}, ${candidates.length} won't run${examples ? ` (e.g. ${examples})` : ''}?`,
+      'Optimize', 'Details', 'Skip', 'Never for this repo');
+  }
+  if (pick === 'Optimize') await runOptimize(context, log, folder, stacks, candidates.map(e => e.id), key);
   else if (pick === 'Skip') await saveDecision(context.globalState, key, 'skipped');
   else if (pick === 'Never for this repo') await saveDecision(context.globalState, key, 'never');
 }
 
 // ponytail: activate nggak boleh mati diam-diam — semua error notif ketangkep + masuk channel.
+function showOptimizationResult(context: vscode.ExtensionContext, log: vscode.OutputChannel): void {
+  const folder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+  if (!folder) {
+    vscode.window.showInformationMessage('Extension Diet: no folder open.');
+    return;
+  }
+  const stacks = detectStack(folder);
+  const exts = vscode.extensions.all;
+  const names = new Map(exts.map(e => [e.id.toLowerCase(), e.packageJSON?.displayName as string | undefined]));
+  const plan = getOptimizationPlan(exts.map(e => e.id), stacks, getPins(context.globalState));
+  const label = (e: PlanEntry) => `${names.get(e.id.toLowerCase()) ?? e.label} (${e.id}) — ${e.reason}`;
+  const section = (title: string, entries: PlanEntry[]) =>
+    [`${title} (${entries.length}):`, ...entries.map(e => `- ${label(e)}`)].join('\n');
+  log.appendLine([
+    `Extension Diet — ${folder}`,
+    `Detected stacks: ${stacks.join(', ') || 'none'}`,
+    '',
+    section('Will not run in optimized window', plan.notRunning),
+    '',
+    section('Kept because stack matched', plan.keptByStack),
+    '',
+    section('Kept always', plan.keptAlways),
+    '',
+    section('Kept because pinned', plan.keptPinned),
+    '',
+    section('Unknown, kept safe', plan.unknownKept),
+  ].join('\n'));
+  log.show();
+}
+
 async function safeNotify(context: vscode.ExtensionContext, log: vscode.OutputChannel): Promise<void> {
   try {
     await maybeNotify(context, log);
@@ -112,34 +149,14 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.window.showInformationMessage(`Extension Diet: ${choice} will always stay on.`);
   }));
   context.subscriptions.push(vscode.commands.registerCommand('extensionDiet.showLog', () => log.show()));
-  context.subscriptions.push(vscode.commands.registerCommand('extensionDiet.showOptimizationResult', () => {
-    const folder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-    if (!folder) {
-      vscode.window.showInformationMessage('Extension Diet: no folder open.');
-      return;
+  context.subscriptions.push(vscode.commands.registerCommand('extensionDiet.showOptimizationResult', () => showOptimizationResult(context, log)));
+  context.subscriptions.push(vscode.commands.registerCommand('extensionDiet.resetAllDecisions', async () => {
+    const go = await vscode.window.showWarningMessage('Extension Diet: forget all repo decisions and pins?', 'Yes', 'No');
+    if (go !== 'Yes') return;
+    for (const key of context.globalState.keys()) {
+      if (key === PINS_KEY || key.startsWith('extdiet:')) await context.globalState.update(key, undefined);
     }
-    const stacks = detectStack(folder);
-    const exts = vscode.extensions.all;
-    const names = new Map(exts.map(e => [e.id.toLowerCase(), e.packageJSON?.displayName as string | undefined]));
-    const plan = getOptimizationPlan(exts.map(e => e.id), stacks, getPins(context.globalState));
-    const label = (e: PlanEntry) => `${names.get(e.id.toLowerCase()) ?? e.label} (${e.id}) — ${e.reason}`;
-    const section = (title: string, entries: PlanEntry[]) =>
-      [`${title} (${entries.length}):`, ...entries.map(e => `- ${label(e)}`)].join('\n');
-    log.appendLine([
-      `Extension Diet — ${folder}`,
-      `Detected stacks: ${stacks.join(', ') || 'none'}`,
-      '',
-      section('Will not run in optimized window', plan.notRunning),
-      '',
-      section('Kept because stack matched', plan.keptByStack),
-      '',
-      section('Kept always', plan.keptAlways),
-      '',
-      section('Kept because pinned', plan.keptPinned),
-      '',
-      section('Unknown, kept safe', plan.unknownKept),
-    ].join('\n'));
-    log.show();
+    vscode.window.showInformationMessage('Extension Diet: all decisions reset.');
   }));
   context.subscriptions.push(vscode.commands.registerCommand('extensionDiet.resetRepoDecision', async () => {
     const folder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;

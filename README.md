@@ -41,6 +41,7 @@ Extensions excluded via CLI flags may **not** appear under the `@disabled` filte
 - `Extension Diet: Show Detection Result`
 - `Extension Diet: Never Disable This`
 - `Extension Diet: Reset Repo Decision`
+- `Extension Diet: Reset All Decisions`
 - `Extension Diet: Show Log`
 
 ## Development

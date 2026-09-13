@@ -2,7 +2,7 @@
   "name": "extension-diet",
   "displayName": "Extension Diet",
   "description": "Keep VS Code lightweight per project by preventing irrelevant stack extensions from running in optimized windows.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "harikahono",
   "license": "MIT",
   "repository": {
@@ -45,6 +45,10 @@
       {
         "command": "extensionDiet.showOptimizationResult",
         "title": "Extension Diet: Show Optimization Result"
+      },
+      {
+        "command": "extensionDiet.resetAllDecisions",
+        "title": "Extension Diet: Reset All Decisions"
       }
     ]
   },

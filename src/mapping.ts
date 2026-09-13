@@ -146,3 +146,9 @@ export function getOptimizationPlan(installedIds: string[], stacks: string[], pi
 export function getDisableCandidates(installedIds: string[], stacks: string[], pinnedIds: string[] = []): string[] {
   return getOptimizationPlan(installedIds, stacks, pinnedIds).notRunning.map(e => e.id);
 }
+
+export function formatExamples(labels: string[]): string {
+  if (!labels.length) return '';
+  const head = labels.slice(0, 3).join(', ');
+  return labels.length > 3 ? `${head} +${labels.length - 3} more` : head;
+}
