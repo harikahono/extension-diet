@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { detectStack } from './detect';
-import { getDisableCandidates } from './mapping';
+import { getDisableCandidates, getOptimizationPlan } from './mapping';
 import { stateKey } from './store';
 import { buildCommandString, buildRelaunchArgs, isReuseMode } from './relaunch';
 
@@ -63,3 +63,14 @@ assert.deepStrictEqual(
   getDisableCandidates(['rust-lang.rust-analyzer', 'golang.go'], ['php'], ['Rust-Lang.Rust-Analyzer']),
   ['golang.go']);
 console.log('pin check: OK');
+
+const plan = getOptimizationPlan(
+  ['rust-lang.rust-analyzer', 'dart-code.flutter', 'esbenp.prettier-vscode', 'some.unknown-ext'],
+  ['node', 'rust'], ['esbenp.prettier-vscode']);
+assert.deepStrictEqual(plan.notRunning.map(e => e.id), ['dart-code.flutter']);
+assert.strictEqual(plan.notRunning[0].label, 'Flutter');
+assert.deepStrictEqual(plan.keptByStack.map(e => e.id), ['rust-lang.rust-analyzer']);
+assert.deepStrictEqual(plan.keptPinned.map(e => e.id), ['esbenp.prettier-vscode']);
+assert.deepStrictEqual(plan.keptAlways.map(e => e.id), []);
+assert.deepStrictEqual(plan.unknownKept.map(e => e.id), ['some.unknown-ext']);
+console.log('plan check: OK');
