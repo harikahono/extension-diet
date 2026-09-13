@@ -8,7 +8,11 @@ import { stateKey } from './store';
 import { buildCommandString, buildRelaunchArgs, isReuseMode } from './relaunch';
 
 const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'extdiet-'));
-const touch = (dir: string, f: string) => { fs.mkdirSync(dir, { recursive: true }); fs.writeFileSync(path.join(dir, f), '{}'); };
+const touch = (dir: string, f: string) => {
+  const file = path.join(dir, f);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, '{}');
+};
 
 for (const [marker, stack] of Object.entries({ 'composer.json': 'php', 'package.json': 'node', 'Cargo.toml': 'rust', 'pubspec.yaml': 'flutter', 'requirements.txt': 'python', 'go.mod': 'go' })) {
   const d = tmp(); touch(d, marker);
@@ -16,6 +20,8 @@ for (const [marker, stack] of Object.entries({ 'composer.json': 'php', 'package.
 }
 const multi = tmp(); touch(multi, 'composer.json'); touch(multi, 'package.json');
 assert.deepStrictEqual(detectStack(multi), ['php', 'node']);
+const tauri = tmp(); touch(tauri, 'package.json'); touch(tauri, 'src-tauri/Cargo.toml');
+assert.deepStrictEqual(detectStack(tauri), ['node', 'rust']);
 assert.deepStrictEqual(detectStack(tmp()), []);
 console.log('detect check: OK');
 
