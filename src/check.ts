@@ -22,6 +22,10 @@ const multi = tmp(); touch(multi, 'composer.json'); touch(multi, 'package.json')
 assert.deepStrictEqual(detectStack(multi), ['php', 'node']);
 const tauri = tmp(); touch(tauri, 'package.json'); touch(tauri, 'src-tauri/Cargo.toml');
 assert.deepStrictEqual(detectStack(tauri), ['node', 'rust']);
+const mono = tmp(); touch(mono, 'backend/package.json'); touch(mono, 'frontend/package.json');
+assert.deepStrictEqual(detectStack(mono), ['node']);
+const skipped = tmp(); touch(skipped, 'node_modules/package.json'); touch(skipped, 'dist/package.json');
+assert.deepStrictEqual(detectStack(skipped), []);
 assert.deepStrictEqual(detectStack(tmp()), []);
 console.log('detect check: OK');
 
