@@ -1,0 +1,46 @@
+{
+  "name": "extension-diet",
+  "displayName": "Extension Diet",
+  "description": "Bikin VSCode lebih ringan per project by keeping irrelevant stack extensions from running in optimized windows.",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "extensionDiet.showDetection",
+        "title": "Extension Diet: Show Detection Result"
+      },
+      {
+        "command": "extensionDiet.optimizeWorkspace",
+        "title": "Extension Diet: Optimize Workspace"
+      },
+      {
+        "command": "extensionDiet.neverDisable",
+        "title": "Extension Diet: Never Disable This"
+      },
+      {
+        "command": "extensionDiet.showLog",
+        "title": "Extension Diet: Show Log"
+      },
+      {
+        "command": "extensionDiet.resetRepoDecision",
+        "title": "Extension Diet: Reset Repo Decision"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "check": "tsc -p ./ && node ./out/check.js",
+    "vscode:prepublish": "npm run compile"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.5.0"
+  }
+}
